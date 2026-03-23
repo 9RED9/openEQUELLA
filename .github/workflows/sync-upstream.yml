@@ -5,6 +5,10 @@ on:
     - cron: "0 23 * * *" # 한국 시간(KST) 오전 8시 실행 (UTC 23:00)
   workflow_dispatch: {}
 
+# 2026년 6월 2일부터 Node.js 24가 기본값 Node.js 24 사용을 강제
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
 jobs:
   sync:
     runs-on: ubuntu-latest
