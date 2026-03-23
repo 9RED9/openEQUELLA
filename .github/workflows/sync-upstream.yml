@@ -2,24 +2,37 @@ name: Sync Fork with Upstream
 
 on:
   schedule:
-    - cron: "0 8 * * *" # 매일 아침 8시
+    - cron: "0 23 * * *" # 한국 시간(KST) 오전 8시 실행 (UTC 23:00)
   workflow_dispatch: {}
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # 푸시 권한 명시 (최신 보안 정책 대응)
+      
     steps:
       - name: Checkout fork
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          ref: develop # 동기화할 대상 브랜치를 명시
           fetch-depth: 0
 
       - name: Add upstream
         run: |
+          # 1. 원본 저장소 등록
           git remote add upstream https://github.com/openequella/openEQUELLA.git
-          git fetch upstream
+          
+          # 2. 원본 데이터 가져오기
+          git fetch upstream develop
+
+          # 3. 로컬 develop 브랜치로 이동 확인
+          git checkout develop
 
       - name: Merge upstream changes
         run: |
+          # 4. 원본의 내용을 머지 (커밋 메시지와 함께)
           git merge upstream/develop -m "Sync upstream"
+
+          # 5. 내 저장소(origin)의 develop 브랜치로 푸시
           git push origin develop
