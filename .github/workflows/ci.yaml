@@ -3,6 +3,7 @@
 #  - Upstream CI steps & comments 100% 유지
 #  - Fork에서는 skip (DISABLE_FORK_CI=true)
 #  - Skip 메시지 출력
+#  - GitHub Actions "env" 조건식 문법 오류 수정 완료
 # ===========================================
 
 name: openEQUELLA CI
@@ -11,7 +12,6 @@ name: openEQUELLA CI
 # ✅ upstream에는 이 값이 없으므로 정상 실행됨
 env:
   DISABLE_FORK_CI: true
-
 
 on:
   push:
@@ -31,20 +31,19 @@ on:
       - stable-*
       - component/**
 
-
 jobs:
 
   ############################################################
   # build_and_check
   ############################################################
   build_and_check:
-    if: ${{ !env.DISABLE_FORK_CI }}
+    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
     runs-on: ubuntu-22.04
 
     steps:
-      # ✅ 추가된 skip 메시지
+      # ✅ skip 메시지
       - name: ⏭️ Skipped on fork
-        if: ${{ env.DISABLE_FORK_CI }}
+        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
         run: echo "[build_and_check] skipped on fork repository (DISABLE_FORK_CI=true)."
 
       - uses: actions/checkout@v4
@@ -154,19 +153,16 @@ jobs:
           path: artefacts.tar
 
 
-
-
   ############################################################
   # build_storybook
   ############################################################
   build_storybook:
-    if: ${{ !env.DISABLE_FORK_CI }}
+    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
     runs-on: ubuntu-22.04
 
     steps:
-      # ✅ 추가된 skip 메시지
       - name: ⏭️ Skipped on fork
-        if: ${{ env.DISABLE_FORK_CI }}
+        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
         run: echo "[build_storybook] skipped on fork repository (DISABLE_FORK_CI=true)."
 
       # Using v1 (rather than v2) through-out this workflow due to issue:
@@ -218,13 +214,11 @@ jobs:
           path: react-front-end/storybook.tar
 
 
-
-
   ############################################################
   # functional_testing
   ############################################################
   functional_testing:
-    if: ${{ !env.DISABLE_FORK_CI }}
+    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
     needs: build_and_check
     runs-on: ubuntu-22.04
 
@@ -260,9 +254,8 @@ jobs:
       MATRIX_ID: ${{ matrix.newui && 'NEWUI' || 'OLDUI' }}-psql_${{ matrix.pgsql-image }}
 
     steps:
-      # ✅ 추가된 skip 메시지
       - name: ⏭️ Skipped on fork
-        if: ${{ env.DISABLE_FORK_CI }}
+        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
         run: echo "[functional_testing] skipped on fork repository (DISABLE_FORK_CI=true)."
 
       - name: Install OS dependencies
@@ -361,13 +354,11 @@ jobs:
           path: coverage_report.tar
 
 
-
-
   ############################################################
   # rest-module-testing
   ############################################################
   rest-module-testing:
-    if: ${{ !env.DISABLE_FORK_CI }}
+    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
     needs: build_and_check
     runs-on: ubuntu-22.04
 
@@ -391,9 +382,8 @@ jobs:
       AUTOTEST_CONFIG: autotest/github-actions.conf
 
     steps:
-      # ✅ 추가된 skip 메시지
       - name: ⏭️ Skipped on fork
-        if: ${{ env.DISABLE_FORK_CI }}
+        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
         run: echo "[rest-module-testing] skipped on fork repository (DISABLE_FORK_CI=true)."
 
       - uses: actions/checkout@v4
