@@ -1,12 +1,29 @@
+# ===========================================
+#  Fork Repository Minimal Stub CI
+#  - Upstream CI steps & comments 유지
+#  - Fork에서는 skip (github.repository_owner != 'openequella')
+#  - Skip 메시지 출력
+# ===========================================
+
 name: 'Close stale issues and PRs'
+
 on:
   schedule:
     - cron: '0 0 * * *'
 
 jobs:
   stale:
+    # ✅ Upstream 저장소에서만 실행 (owner = openequella)
+    if: ${{ github.repository_owner == 'openequella' }}
     runs-on: ubuntu-latest
+
     steps:
+      # ✅ Fork에서는 skip 메시지 출력
+      - name: ⏭️ Skipped on fork
+        if: ${{ github.repository_owner != 'openequella' }}
+        run: echo "[stale] skipped on fork repository (owner != openequella)."
+
+      # ✅ 원본 stale bot 동작 유지 (Upstream에서만 실행됨)
       - uses: actions/stale@v9
         with:
           stale-issue-label: 'stale'
