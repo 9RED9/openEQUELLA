@@ -1,17 +1,11 @@
 # ===========================================
-#  Fork Repository Minimal Stub CI (FULL VERSION)
-#  - Upstream CI steps & comments 100% 유지
-#  - Fork에서는 skip (DISABLE_FORK_CI=true)
+#  Fork Repository Minimal Stub CI
+#  - Upstream CI steps & comments 유지
+#  - Fork에서는 skip (github.repository_owner != 'openequella')
 #  - Skip 메시지 출력
-#  - GitHub Actions "env" 조건식 문법 오류 수정 완료
 # ===========================================
 
 name: openEQUELLA CI
-
-# ✅ 포크 저장소에서만 TRUE 로 유지하면 전체 job skip
-# ✅ upstream에는 이 값이 없으므로 정상 실행됨
-env:
-  DISABLE_FORK_CI: true
 
 on:
   push:
@@ -37,14 +31,15 @@ jobs:
   # build_and_check
   ############################################################
   build_and_check:
-    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
+    # ✅ Upstream owner에서만 실행
+    if: ${{ github.repository_owner == 'openequella' }}
     runs-on: ubuntu-22.04
 
     steps:
-      # ✅ skip 메시지
+      # ✅ Fork skip 메시지
       - name: ⏭️ Skipped on fork
-        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
-        run: echo "[build_and_check] skipped on fork repository (DISABLE_FORK_CI=true)."
+        if: ${{ github.repository_owner != 'openequella' }}
+        run: echo "[build_and_check] skipped (fork repository)."
 
       - uses: actions/checkout@v4
 
@@ -153,17 +148,18 @@ jobs:
           path: artefacts.tar
 
 
+
   ############################################################
   # build_storybook
   ############################################################
   build_storybook:
-    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
+    if: ${{ github.repository_owner == 'openequella' }}
     runs-on: ubuntu-22.04
 
     steps:
       - name: ⏭️ Skipped on fork
-        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
-        run: echo "[build_storybook] skipped on fork repository (DISABLE_FORK_CI=true)."
+        if: ${{ github.repository_owner != 'openequella' }}
+        run: echo "[build_storybook] skipped (fork repository)."
 
       # Using v1 (rather than v2) through-out this workflow due to issue:
       # https://github.com/actions/checkout/issues/237
@@ -214,11 +210,12 @@ jobs:
           path: react-front-end/storybook.tar
 
 
+
   ############################################################
   # functional_testing
   ############################################################
   functional_testing:
-    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
+    if: ${{ github.repository_owner == 'openequella' }}
     needs: build_and_check
     runs-on: ubuntu-22.04
 
@@ -255,8 +252,8 @@ jobs:
 
     steps:
       - name: ⏭️ Skipped on fork
-        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
-        run: echo "[functional_testing] skipped on fork repository (DISABLE_FORK_CI=true)."
+        if: ${{ github.repository_owner != 'openequella' }}
+        run: echo "[functional_testing] skipped (fork repository)."
 
       - name: Install OS dependencies
         run: |
@@ -340,9 +337,6 @@ jobs:
         run: |
           ./sbt "project autotest" coverageReport
 
-      # To save significant time on file upload, we first tar up the directory
-      # as it contains > 10k files and the artefact upload was taking almost
-      # 1hr.
       - name: Package Coverage Report
         run: |
           tar cvf coverage_report.tar autotest/target/coverage-report/
@@ -354,11 +348,12 @@ jobs:
           path: coverage_report.tar
 
 
+
   ############################################################
   # rest-module-testing
   ############################################################
   rest-module-testing:
-    if: ${{ env['DISABLE_FORK_CI'] != 'true' }}
+    if: ${{ github.repository_owner == 'openequella' }}
     needs: build_and_check
     runs-on: ubuntu-22.04
 
@@ -383,8 +378,8 @@ jobs:
 
     steps:
       - name: ⏭️ Skipped on fork
-        if: ${{ env['DISABLE_FORK_CI'] == 'true' }}
-        run: echo "[rest-module-testing] skipped on fork repository (DISABLE_FORK_CI=true)."
+        if: ${{ github.repository_owner != 'openequella' }}
+        run: echo "[rest-module-testing] skipped (fork repository)."
 
       - uses: actions/checkout@v4
 
